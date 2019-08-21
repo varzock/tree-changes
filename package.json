@@ -1,7 +1,7 @@
 {
   "name": "tree-changes",
   "version": "0.5.1",
-  "description": "Helpers function to get tree changes between two datasets",
+  "description": "Get changes between two versions of data with similar shape",
   "author": "Gil Barbara <gilbarbara@gmail.com>",
   "repository": {
     "type": "git",
@@ -12,11 +12,13 @@
   },
   "homepage": "https://github.com/gilbarbara/tree-changes#readme",
   "main": "lib/index.js",
+  "module": "esm/index.js",
   "files": [
-    "lib",
-    "src"
+    "esm",
+    "lib"
   ],
-  "types": "lib/index.d.ts",
+  "types": "./lib",
+  "sideEffects": false,
   "keywords": [
     "comparison",
     "tree"
@@ -24,36 +26,39 @@
   "license": "MIT",
   "dependencies": {
     "deep-diff": "^1.0.2",
-    "nested-property": "1.0.1"
+    "fast-deep-equal": "^3.1.1"
   },
   "devDependencies": {
     "@gilbarbara/tsconfig": "^0.1.0",
-    "@size-limit/preset-small-lib": "^2.1.0",
+    "@size-limit/preset-small-lib": "^2.2.4",
     "@types/deep-diff": "^1.0.0",
-    "@types/jest": "^24.0.17",
-    "@types/node": "^12.7.2",
-    "chalk": "^2.4.2",
-    "cross-env": "^5.2.0",
-    "husky": "^3.0.4",
+    "@types/jest": "^24.0.25",
+    "@types/node": "^13.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^3.1.0",
     "jest": "^24.9.0",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "repo-tools": "^0.2.0",
     "rimraf": "^3.0.0",
-    "size-limit": "^2.1.0",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.18.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-react": "^4.0.0",
-    "typescript": "^3.5.3"
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.4"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:js",
-    "build:js": "tsc --outDir lib",
-    "watch": "npm run build:js -- -w",
-    "clean": "rimraf lib",
-    "lint": "tslint -p tsconfig.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc",
+    "build:esm": "tsc -m es6 --outDir esm",
+    "watch": "npm run build:esm && npm run build:cjs -- -w",
+    "clean": "rimraf lib &&  rimraf esm",
+    "lint": "eslint --ext .ts,.tsx src test",
     "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage --bail",
     "test:watch": "jest --watch --verbose",
     "format": "prettier \"**/*.{js,jsx,json,yml,yaml,css,less,scss,ts,tsx,md,graphql,mdx}\" --write",
     "validate": "npm run lint && npm run test:coverage && npm run size",
@@ -70,6 +75,10 @@
   "size-limit": [
     {
       "path": "./lib/index.js",
+      "limit": "3 kB"
+    },
+    {
+      "path": "./esm/index.js",
       "limit": "3 kB"
     }
   ],
