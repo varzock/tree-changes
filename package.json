@@ -24,31 +24,40 @@
     "tree"
   ],
   "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
   "dependencies": {
     "deep-diff": "^1.0.2",
     "fast-deep-equal": "^3.1.1"
   },
   "devDependencies": {
     "@gilbarbara/tsconfig": "^0.1.0",
-    "@size-limit/preset-small-lib": "^2.2.4",
+    "@size-limit/preset-small-lib": "^4.3.1",
+    "@testing-library/jest-dom": "^5.1.1",
+    "@testing-library/react": "^9.5.0",
     "@types/deep-diff": "^1.0.0",
-    "@types/jest": "^24.0.25",
-    "@types/node": "^13.1.4",
-    "@typescript-eslint/eslint-plugin": "^2.14.0",
-    "@typescript-eslint/parser": "^2.14.0",
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.0",
+    "@types/react": "^16.9.23",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "@typescript-eslint/parser": "^2.22.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.9.0",
-    "eslint-plugin-import": "^2.19.1",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.2",
-    "husky": "^3.1.0",
-    "jest": "^24.9.0",
+    "husky": "^4.2.3",
+    "jest": "^25.1.0",
     "prettier": "^1.19.1",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
     "repo-tools": "^0.2.0",
-    "rimraf": "^3.0.0",
-    "ts-jest": "^24.2.0",
-    "typescript": "^3.7.4"
+    "rimraf": "^3.0.2",
+    "size-limit": "^4.3.1",
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
@@ -61,8 +70,8 @@
     "test:coverage": "jest --coverage --bail",
     "test:watch": "jest --watch --verbose",
     "format": "prettier \"**/*.{js,jsx,json,yml,yaml,css,less,scss,ts,tsx,md,graphql,mdx}\" --write",
-    "validate": "npm run lint && npm run test:coverage && npm run size",
-    "size": "npm run build && size-limit",
+    "validate": "npm run lint && npm run test:coverage && npm run build && npm run size",
+    "size": "size-limit",
     "prepublishOnly": "npm run validate"
   },
   "prettier": {
