@@ -16,6 +16,8 @@ export interface Params {
   previous?: Value;
 }
 
+export type TreeChangesFn = (previousData: Data, data: Data) => TreeChanges;
+
 export interface TreeChanges {
   added: (key?: Key, compare?: any) => boolean;
   changed: (key?: Key, actual?: Value, previous?: Value) => boolean;

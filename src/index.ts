@@ -1,6 +1,7 @@
 import * as equal from 'fast-deep-equal';
 import { compareNumbers, getIterables, isArray, isDefined, isPlainObj, nested } from './helpers';
 
+import createTreeChangesHook from './hook';
 import { Data, Key, Value, TreeChanges } from './types';
 
 export default function treeChanges(data: Data, nextData: Data): TreeChanges {
@@ -129,3 +130,5 @@ export default function treeChanges(data: Data, nextData: Data): TreeChanges {
 
   return { added, changed, changedFrom, changedTo, decreased, emptied, filled, increased, removed };
 }
+
+export const useTreeChanges = createTreeChangesHook(treeChanges);
