@@ -2,16 +2,27 @@
 import {
   canHaveLength,
   compareNumbers,
+  compareValues,
   getIterables,
   isArray,
+  isDefined,
   isNumber,
-  isPlainObj,
+  isPlainObject,
   isSameType,
   isString,
+  nested,
 } from '../src/helpers';
 
-const left = {
+import { PlainObject } from '../src/types';
+
+const left: PlainObject = {
   data: [],
+  messages: [
+    { id: 1, messsage: 'hello' },
+    { id: 2, messsage: 'hey' },
+    { id: 3, messsage: 'sup?' },
+  ],
+  name: '',
   options: {},
   ratio: 0.8,
   retries: 0,
@@ -19,9 +30,20 @@ const left = {
   version: 1,
 };
 
-const right = {
+const right: PlainObject = {
   data: [{ a: 1 }],
-  options: {},
+  messages: [
+    { id: 2, messsage: 'hey' },
+    { id: 3, messsage: 'sup?' },
+  ],
+  name: 'John',
+  options: {
+    ui: {
+      color: '#333',
+      tags: ['simple', 'clean'],
+    },
+    updatedAt: 1234567890,
+  },
   ratio: 0.4,
   retries: 1,
   status: 'done',
@@ -99,23 +121,61 @@ describe('compareNumbers', () => {
   });
 });
 
-describe('getIterables', () => {
+describe('compareValues', () => {
+  describe('left to right', () => {
+    it.each([
+      // Numbers
+      [0.4, 'ratio', true],
+      [1, 'retries', true],
+      ['1', 'retries', false],
+
+      // Objects
+      // [{ color: '#333' }, 'options.ui', true],
+      [{ updatedAt: 1234567890 }, 'options', true],
+      [{ id: 3, messsage: 'sup?' }, 'messages', false],
+
+      // Arrays
+      [[{ a: 1 }], 'data', true],
+      [[{ a: 1 }], 'data', true],
+      // [{ a: 1 }, 'data', false],
+
+      // String
+      ['idle', 'status', false],
+      ['done', 'status', true],
+      ['', 'name', false],
+      ['John', 'name', true],
+    ])('compareValues %p should be %s)', (value, key, expected) => {
+      expect(compareValues(left[key], right[key], value)).toBe(expected);
+    });
+  });
+
+  describe('right to left', () => {
+    it.each([
+      [0.8, 'ratio', true],
+      [{ id: 1, messsage: 'hello' }, 'messages', true],
+      [{ id: 2, messsage: 'hey' }, 'messages', false],
+      [{ id: 3, messsage: 'sup?' }, 'messages', false],
+    ])('compareValues with %s should be %s)', (value, key, expected) => {
+      expect(compareValues(right[key], left[key], value)).toBe(expected);
+    });
+  });
+});
+
+describe('getComparables', () => {
   it('should get iterables', () => {
     expect(getIterables(left, right, { key: 'data' })).toEqual([[], [{ a: 1 }]]);
-    expect(getIterables(left, right, { key: 'options' })).toEqual([[], []]);
-    expect(getIterables(left, right, { key: 'status' })).toEqual(['idle', 'done']);
+    expect(getIterables(left, right, { key: 'options' })).toEqual([[], ['ui', 'updatedAt']]);
+    expect(getIterables(left, right, { key: 'status' })).toMatchSnapshot();
   });
 
   it('should throw for invalid types', () => {
-    expect(() => getIterables(left, right, { key: 'version' })).toThrow(
+    expect(() => getIterables(left.version, right.version, { key: 'version' })).toThrow(
       'Inputs have different types',
     );
 
-    expect(() => getIterables(left, right, { key: 'ratio' })).toThrow("Inputs dont't have length");
+    expect(() => getIterables(left.ratio, right.ratio)).toThrow("Inputs dont't have length");
 
-    expect(() => getIterables(left, right, { exclude: 'string', key: 'status' })).toThrow(
-      'Strings are excluded',
-    );
+    expect(() => getIterables(left.status, right.status)).toThrow('Strings are excluded');
   });
 });
 
@@ -126,6 +186,19 @@ describe('isArray', () => {
     expect([[], {}].every(isArray)).toBe(false);
     expect([0, []].every(isArray)).toBe(false);
     expect(['', 1].every(isArray)).toBe(false);
+  });
+});
+
+describe('isDefined', () => {
+  it('should return properly', () => {
+    expect(isDefined('')).toBe(true);
+    expect(isDefined(false)).toBe(true);
+    expect(isDefined(null)).toBe(true);
+    expect(isDefined([])).toBe(true);
+
+    expect(isDefined(undefined)).toBe(false);
+    // @ts-ignore
+    expect(isDefined()).toBe(false);
   });
 });
 
@@ -141,11 +214,11 @@ describe('isNumber', () => {
 
 describe('isPlainObj', () => {
   it('should detect plain objects', () => {
-    expect([{}, {}].every(isPlainObj)).toBe(true);
+    expect([{}, {}].every(isPlainObject)).toBe(true);
 
-    expect([[], {}].every(isPlainObj)).toBe(false);
-    expect([0, []].every(isPlainObj)).toBe(false);
-    expect(['', 1].every(isPlainObj)).toBe(false);
+    expect([[], {}].every(isPlainObject)).toBe(false);
+    expect([0, []].every(isPlainObject)).toBe(false);
+    expect(['', 1].every(isPlainObject)).toBe(false);
   });
 });
 
@@ -170,5 +243,17 @@ describe('isString', () => {
     expect([[], {}].every(isString)).toBe(false);
     expect([0, []].every(isString)).toBe(false);
     expect(['', 1].every(isString)).toBe(false);
+  });
+});
+
+describe('nested', () => {
+  it('should get the correct data', () => {
+    expect(nested(right, 'status')).toBe('done');
+    expect(nested(right, 'options.ui')).toEqual({ color: '#333', tags: ['simple', 'clean'] });
+    expect(nested(right, 'options.ui.tags.0')).toBe('simple');
+    expect(nested(right.options.ui.tags, 1)).toBe('clean');
+    expect(nested(right, 'options.updatedAt')).toBe(1234567890);
+    // @ts-ignore
+    expect(nested(right.status, 1)).toBe('done');
   });
 });

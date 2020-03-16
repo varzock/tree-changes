@@ -5,6 +5,7 @@ describe('tree-changes', () => {
     data: { a: 1 },
     hasData: false,
     items: [{ name: 'testing' }, { name: 'QA' }],
+    matrix: [[0, 1]],
     messages: [{ title: 'Hello' }],
     missing: 'username',
     notifications: [],
@@ -19,7 +20,7 @@ describe('tree-changes', () => {
     status: 'idle',
     stuff: [],
     switch: false,
-    tasks: { 123: 'do it' },
+    tasks: { test: 'do it', passed: [190292] },
     username: '',
     versions: ['0.1', 0.5, 1, { id: '1.1.0' }, { id: '2.0.0' }],
   };
@@ -28,8 +29,13 @@ describe('tree-changes', () => {
     data: { a: 1, b: 2 },
     hasData: true,
     items: [{ name: 'building' }, { name: 'QA' }, { name: 'deploy' }],
+    matrix: [
+      [0, 1],
+      [2, 3],
+    ],
     messages: [],
     missing: '',
+    new: [{ id: 12 }, { id: 13 }],
     notifications: ['Viewed profile'],
     options: { a: 1 },
     ratio: 0.4,
@@ -38,10 +44,10 @@ describe('tree-changes', () => {
       data: [{ type: 'desc' }, { type: 'asc' }],
       status: 'loaded',
     },
-    status: 'done',
+    status: 'ready',
     stuff: [],
     sudo: true,
-    tasks: {},
+    tasks: { passed: [190292, 192019] },
     username: 'john',
     versions: ['0.1', 0.6, 0.9, { id: '2.0.0' }],
   };
@@ -58,14 +64,12 @@ describe('tree-changes', () => {
   describe('added', () => {
     it('with arrays', () => {
       const { added } = treeChanges(A.items, B.items);
-      // @ts-ignore
       expect(added()).toBe(true);
     });
 
     it('with objects', () => {
       const { added } = treeChanges(A, B);
       expect(added('data')).toBe(true);
-      // expect(added('data', { c: 2 })).toBe(true);
       expect(added('items')).toBe(true);
       expect(added('sudo')).toBe(true);
 
@@ -73,6 +77,39 @@ describe('tree-changes', () => {
       expect(added('ratio')).toBe(false);
       expect(added('status')).toBe(false);
       expect(added('stuff')).toBe(false);
+    });
+
+    it('with the `value` parameter', () => {
+      const { added } = treeChanges(A, B);
+
+      expect(added('', { new: [{ id: 12 }, { id: 13 }] })).toBe(true);
+      expect(added('', { new: [{ id: 12 }] })).toBe(false);
+
+      expect(added('', [{ id: 12 }, { id: 13 }])).toBe(true);
+      expect(added('', [{ id: 12 }])).toBe(false);
+
+      expect(added('data', { b: 2 })).toBe(true);
+      expect(added('data', { a: 1 })).toBe(false);
+
+      expect(added('tasks', [190292, 192019])).toBe(false);
+      expect(added('tasks', { test: 'do it' })).toBe(false);
+
+      expect(added('matrix', [2, 3])).toBe(true);
+      expect(
+        added('matrix', [
+          [0, 1],
+          [2, 3],
+        ]),
+      ).toBe(false);
+      expect(added('matrix', [0, 1])).toBe(false);
+
+      expect(added('options')).toBe(true);
+      expect(added('options', { a: 2 })).toBe(false);
+      expect(added('status')).toBe(false);
+      expect(added('status', 'ready')).toBe(false);
+
+      expect(added('versions', 0.6)).toBe(true);
+      expect(added('versions', '0.1')).toBe(false);
     });
   });
 
@@ -152,9 +189,9 @@ describe('tree-changes', () => {
     it('with objects', () => {
       const { changed } = treeChanges(A, B);
 
-      expect(changed('status', 'done', 'idle')).toBe(true);
-      expect(changed('status', 'done', ['ready', 'running'])).toBe(false);
-      expect(changed('status', ['error', 'ready'], 'idle')).toBe(false);
+      expect(changed('status', 'ready', 'idle')).toBe(true);
+      expect(changed('status', 'ready', ['ready', 'running'])).toBe(false);
+      expect(changed('status', ['error', 'done'], 'idle')).toBe(false);
 
       expect(changed('hasData', true, false)).toBe(true);
       expect(changed('hasData', false, true)).toBe(false);
@@ -193,9 +230,9 @@ describe('tree-changes', () => {
       // @ts-ignore
       expect(changedFrom('status')).toBe(false);
       expect(changedFrom('status', 'idle')).toBe(true);
-      expect(changedFrom('status', 'idle', 'done')).toBe(true);
-      expect(changedFrom('status', ['ready', 'running'], 'done')).toBe(false);
-      expect(changedFrom('status', 'idle', ['error', 'ready'])).toBe(false);
+      expect(changedFrom('status', 'idle', 'ready')).toBe(true);
+      expect(changedFrom('status', ['ready', 'running'], 'ready')).toBe(false);
+      expect(changedFrom('status', 'idle', ['error', 'done'])).toBe(false);
 
       expect(changedFrom('hasData', false)).toBe(true);
       expect(changedFrom('hasData', false, true)).toBe(true);
@@ -357,13 +394,12 @@ describe('tree-changes', () => {
   describe('removed', () => {
     it('with arrays', () => {
       const { removed } = treeChanges(A.versions, B.versions);
-      // @ts-ignore
       expect(removed()).toBe(true);
     });
 
     it('with objects', () => {
       const { removed } = treeChanges(A, B);
-      expect(removed()).toBe(true);
+      expect(removed()).toBe(false);
       expect(removed('switch')).toBe(true);
       expect(removed('tasks')).toBe(true);
       expect(removed('versions')).toBe(true);
@@ -371,6 +407,14 @@ describe('tree-changes', () => {
       expect(removed('ratio')).toBe(false);
       expect(removed('status')).toBe(false);
       expect(removed('stuff')).toBe(false);
+    });
+
+    it('with the `value` parameter', () => {
+      const { removed } = treeChanges(A, B);
+
+      expect(removed('switch', false)).toBe(true);
+      expect(removed('tasks', { test: 'do it' })).toBe(true);
+      expect(removed('versions', { id: '1.1.0' })).toBe(true);
     });
   });
 });

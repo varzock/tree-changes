@@ -16,91 +16,35 @@ npm install tree-changes
 ```js
 import treeChanges from 'tree-changes';
 
-const savedData = {
-  actions: {},
-  data: { a: 1 },
+const previousData = {
   hasData: false,
-  items: [{ name: 'test' }],
-  messages: [],
-  missing: 'username',
-  pristine: true,
-  ratio: 0.9,
-  retries: 0,
   sort: {
     data: [{ type: 'asc' }, { type: 'desc' }],
     status: 'idle',
   },
-  switch: false,
-  username: '',
 };
 
 const newData = {
-  actions: { complete: true },
-  data: {},
   hasData: true,
-  items: [],
-  messages: ['New Message'],
-  missing: '',
-  ratio: 0.5,
-  retries: 1,
   sort: {
     data: [{ type: 'desc' }, { type: 'asc' }],
     status: 'success',
   },
-  sudo: true,
-  username: 'John',
 };
 
-const {
-  added,
-  changed,
-  changedFrom,
-  decreased,
-  emptied,
-  filled,
-  increased,
-  removed,
-} = treeChanges(savedData, newData);
+const { changed, changedFrom } = treeChanges(previousData, newData);
 
 changed(); // true
 
 changed('hasData'); // true
 changed('hasData', true); // true
 changed('hasData', true, false); // true
-changed('actions', { complete: true }, {})
 
 // support nested match
 changed('sort.data.0.type', 'desc'); // true
 
-changedFrom('hasData', false); // true
-changedFrom('hasData', false, true); // true
-
-changedFrom('retries', 0); // true
-changedFrom('retries', 0, 1); // true
-
 // works with array values too
 changedFrom('sort.status', 'idle', ['done', 'success']); // true
-
-added('actions'); // true
-added('messages'); // true
-added('sudo'); // true
-
-removed(); // true
-removed('data'); // true
-removed('items'); // true
-removed('switch'); // true
-
-filled('actions'); // true
-filled('messages'); // true
-filled('username'); // true
-
-emptied('data'); // true
-emptied('items'); // true
-emptied('missing'); // true
-
-decreased('ratio'); // true
-
-increased('retries'); // true
 ```
 
 ####  Works with arrays too.
@@ -116,12 +60,34 @@ changed(1); // true
 changed('1.id', 4); // true
 ```
 
-> It uses [deep-diff](https://github.com/flitbit/diff) to compare objects/arrays and [nested-property](https://github.com/cosmosio/nested-property) to get the nested key.
+> It uses [fast-deep-equal](https://github.com/epoberezkin/fast-deep-equal) to compare properties.
 
 ## API
 
-**added**(`key: Key`)  
-Check if something was added to the data (length has increased). Works with arrays and objects (using Object.keys).
+**added**(`key: Key`, `value?: Value`)  
+Check if something was added to the data.  
+Works with arrays and objects (using Object.keys).
+
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  actions: {},
+  messages: [],
+};
+
+const newData = {
+  actions: { complete: true },
+  messages: ['New Message'],
+  sudo: true,
+};
+
+const { added } = treeChanges(previousData, newData);
+
+added('actions'); // true
+added('messages'); // true
+added('sudo'); // true
+```
 
 **changed**(`key?: Key`, `actual?: Value`, `previous?: Value`)  
 Check if the data has changed.  
@@ -134,18 +100,123 @@ Check if the data has changed from `previous` or from `previous` to `actual`.
 Check if both values are numbers and the value has decreased.  
 It also can compare to the `actual` value or even with the `previous`.
 
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  ratio: 0.9,
+  retries: 0,
+};
+
+const newData = {
+  ratio: 0.5,
+  retries: 1,
+};
+
+const { decreased } = treeChanges(previousData, newData);
+
+decreased('ratio'); // true
+decreased('retries'); // false
+```
+
 **emptied**(`key: Key`)  
 Check if the data was emptied. Works with arrays, objects and strings.
 
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  data: { a: 1 },
+  items: [{ name: 'test' }],
+  missing: 'username',
+};
+
+const newData = {
+  data: {},
+  items: [],
+  missing: '',
+};
+
+const { emptied } = treeChanges(previousData, newData);
+
+emptied('data'); // true
+emptied('items'); // true
+emptied('missing'); // true
+```
+
 **filled**(`key: Key`)  
 Check if the data was filled (from a previous empty value). Works with arrays, objects and strings.
+
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  actions: {},
+  messages: [],
+  username: '',
+};
+
+const newData = {
+  actions: { complete: true },
+  messages: ['New Message'],
+  username: 'John',
+};
+
+const { filled } = treeChanges(previousData, newData);
+
+filled('actions'); // true
+filled('messages'); // true
+filled('username'); // true
+```
 
 **increased**(`key: Key`, `actual?: Value`, `previous?: Value`)  
 Check if both values are numbers and the value has increased.  
 It also can compare to the `actual` value or even with the `previous`.
 
-**removed**(`key: Key`)  
-Check if something was removed from the data (length has decreased). Works with arrays and objects (using Object.keys).
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  ratio: 0.9,
+  retries: 0,
+};
+
+const newData = {
+  ratio: 0.5,
+  retries: 1,
+};
+
+const { increased } = treeChanges(previousData, newData);
+
+increased('retries'); // true
+increased('ratio'); // false
+```
+
+**removed**(`key: Key`, `value?: Value`)  
+Check if something was removed from the data.  
+Works with arrays and objects (using Object.keys).
+
+```js
+import treeChanges from 'tree-changes';
+
+const previousData = {
+  data: { a: 1 },
+  items: [{ name: 'test' }],
+  switch: false,
+};
+
+const newData = {
+  data: {},
+  items: [],
+};
+
+const { removed } = treeChanges(previousData, newData);
+
+removed(); // true
+removed('data'); // true
+removed('items'); // true
+removed('switch'); // true
+```
 
 > **Types**
 > type Key = string | number;  

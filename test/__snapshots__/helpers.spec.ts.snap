@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getComparables should get iterables 1`] = `
+Array [
+  Array [
+    "data",
+    "messages",
+    "name",
+    "options",
+    "ratio",
+    "retries",
+    "status",
+    "version",
+  ],
+  Array [
+    "data",
+    "messages",
+    "name",
+    "options",
+    "ratio",
+    "retries",
+    "status",
+    "version",
+  ],
+]
+`;

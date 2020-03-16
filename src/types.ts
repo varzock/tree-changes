@@ -1,17 +1,17 @@
-export type AcceptedTypes = string | boolean | number | GenericObject;
-export type Data = GenericObject | GenericObject[];
+export type AcceptedTypes = string | boolean | number | PlainObject;
+export type Comparator = Array<string | any[]>;
+export type Data = PlainObject | AcceptedTypes[];
 export type Key = string | number;
 export type Value = AcceptedTypes | AcceptedTypes[];
 
-export type Comparator = Array<string | any[]>;
-
-export interface GenericObject {
+export interface PlainObject {
   [key: string]: any;
 }
 
 export interface Params {
   actual?: Value;
-  exclude?: string;
+  includeStrings?: boolean;
+  filter?: boolean;
   key: Key;
   previous?: Value;
 }
@@ -19,7 +19,7 @@ export interface Params {
 export type TreeChangesFn = (previousData: Data, data: Data) => TreeChanges;
 
 export interface TreeChanges {
-  added: (key?: Key, compare?: any) => boolean;
+  added: (key?: Key, value?: Value) => boolean;
   changed: (key?: Key, actual?: Value, previous?: Value) => boolean;
   changedFrom: (key: Key, previous: Value, actual?: Value) => boolean;
   changedTo: (key: Key, actual: Value) => boolean;
@@ -27,5 +27,5 @@ export interface TreeChanges {
   emptied: (key?: Key) => boolean;
   filled: (key?: Key) => boolean;
   increased: (key: Key, actual?: Value, previous?: Value) => boolean;
-  removed: (key?: Key) => boolean;
+  removed: (key?: Key, value?: Value) => boolean;
 }

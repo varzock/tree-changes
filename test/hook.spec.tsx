@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { render } from '@testing-library/react';
 
-import { useTreeChanges } from '../src';
+import useTreeChanges from '../src/hook';
 
 jest.useFakeTimers();
 

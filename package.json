@@ -24,26 +24,25 @@
     "tree"
   ],
   "license": "MIT",
-  "peerDependencies": {
+  "optionalDependencies": {
     "react": "^16.8.0"
   },
   "dependencies": {
-    "deep-diff": "^1.0.2",
     "fast-deep-equal": "^3.1.1"
   },
   "devDependencies": {
     "@gilbarbara/tsconfig": "^0.1.0",
-    "@size-limit/preset-small-lib": "^4.3.1",
+    "@size-limit/preset-small-lib": "^4.4.0",
     "@testing-library/jest-dom": "^5.1.1",
-    "@testing-library/react": "^9.5.0",
+    "@testing-library/react": "^10.0.1",
     "@types/deep-diff": "^1.0.0",
     "@types/jest": "^25.1.4",
-    "@types/node": "^13.9.0",
+    "@types/node": "^13.9.1",
     "@types/react": "^16.9.23",
-    "@typescript-eslint/eslint-plugin": "^2.22.0",
-    "@typescript-eslint/parser": "^2.22.0",
+    "@typescript-eslint/eslint-plugin": "^2.23.0",
+    "@typescript-eslint/parser": "^2.23.0",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
@@ -55,7 +54,7 @@
     "react-dom": "^16.13.0",
     "repo-tools": "^0.2.0",
     "rimraf": "^3.0.2",
-    "size-limit": "^4.3.1",
+    "size-limit": "^4.4.0",
     "ts-jest": "^25.2.1",
     "typescript": "^3.8.3"
   },
@@ -84,11 +83,19 @@
   "size-limit": [
     {
       "path": "./lib/index.js",
-      "limit": "3 kB"
+      "limit": "2 kB"
     },
     {
       "path": "./esm/index.js",
-      "limit": "3 kB"
+      "limit": "2 kB"
+    },
+    {
+      "path": "./lib/hook.js",
+      "limit": "5 kB"
+    },
+    {
+      "path": "./esm/hook.js",
+      "limit": "5 kB"
     }
   ],
   "husky": {

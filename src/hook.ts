@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { diff } from 'deep-diff';
-import { TreeChangesFn } from './types';
+import { useEffect, useMemo, useRef } from 'react';
+
+import treeChanges from './base';
 
 export function usePrevious<T>(value: T): T | undefined {
   const ref = useRef<T>();
@@ -12,17 +12,8 @@ export function usePrevious<T>(value: T): T | undefined {
   return ref.current;
 }
 
-export default function createTreeChangesHook(treeChanges: TreeChangesFn) {
-  return function useTreeChanges(value: any) {
-    const previousValue = usePrevious(value);
-    const ref = useRef(treeChanges(previousValue || value, value));
+export default function useTreeChanges(value: any) {
+  const previousValue = usePrevious(value);
 
-    useEffect(() => {
-      if (previousValue && diff(previousValue, value)) {
-        ref.current = treeChanges(previousValue, value);
-      }
-    }, [previousValue, value]);
-
-    return ref.current;
-  };
+  return useMemo(() => treeChanges(previousValue || value, value), [previousValue, value]);
 }
