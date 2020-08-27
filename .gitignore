@@ -1,4 +1,5 @@
+.idea
 .tmp
 coverage
-lib
+#lib
 node_modules
